@@ -23,6 +23,8 @@ void UWorldPosition::BeginPlay()
 	FString ActorName = GetOwner()->GetName();
 
 	UE_LOG(LogTemp, Warning, TEXT("World Pos Component, actor name is: %s"), *ActorName);
+	FString ObjectPosition = GetOwner()->GetActorLocation().ToString();
+	UE_LOG(LogTemp, Warning, TEXT("Transform Position is is: %s"), *ObjectPosition);
 }
 
 
