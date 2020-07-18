@@ -25,10 +25,9 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-		
-		float InitalYaw;
-		float TargetYaw;
+	float InitalYaw;
+	float TargetYaw;
 
-		UPROPERTY(EditAnywhere)
-		float YawChange = 90.f;		
+	UPROPERTY(EditAnywhere)
+	float YawChange = 90.f;		
 };
