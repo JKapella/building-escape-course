@@ -23,8 +23,10 @@ void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (!PhysicsHandle) {
+		UE_LOG(LogTemp, Error, TEXT("No PhysicsHandleComponent on object %s"), *GetOwner()->GetName());
+	}
 }
 
 
@@ -51,5 +53,24 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 		0,
 		5.f 
 	);
+
+	//Raycasting
+	FHitResult Hit;
+	FCollisionQueryParams TraceParams(
+		FName(TEXT("")),
+		false,
+		GetOwner()
+	);
+	GetWorld()->LineTraceSingleByObjectType(
+		OUT Hit,
+		PlayerViewpointVector,
+		LineTraceEnd,
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
+		TraceParams
+	);
+
+	if (Hit.GetActor()) {
+		UE_LOG(LogTemp, Warning, TEXT("Raycast hit: %s"), *Hit.GetActor()->GetName());
+	}
 }
 
