@@ -28,15 +28,51 @@ void UGrabber::BeginPlay()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (PhysicsHandle->GrabbedComponent) {
+
+		FVector PlayerViewpointVector;
+		FRotator PlayerViewpointRotator;
+
+		GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+			OUT PlayerViewpointVector, 
+			OUT PlayerViewpointRotator);
+
+		FVector LineTraceEnd = PlayerViewpointVector + (PlayerViewpointRotator.Vector() * Reach);
+
+		PhysicsHandle->SetTargetLocation(LineTraceEnd);
+	}
 }
 
 void UGrabber::Grab() {
+
 	UE_LOG(LogTemp, Error, TEXT("GRAB!"));
-	RaycastToFirstPhysicsBodyInRange();
+
+	FVector PlayerViewpointVector;
+	FRotator PlayerViewpointRotator;
+
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
+		OUT PlayerViewpointVector, 
+		OUT PlayerViewpointRotator);
+
+	FVector LineTraceEnd = PlayerViewpointVector + (PlayerViewpointRotator.Vector() * Reach);
+
+	FHitResult RaycastHitResult = RaycastToFirstPhysicsBodyInRange();
+	UPrimitiveComponent* ComponentToGrab = RaycastHitResult.GetComponent();
+
+	if (RaycastHitResult.GetActor()) {
+		PhysicsHandle->GrabComponentAtLocation(
+			ComponentToGrab,
+			NAME_None,
+			LineTraceEnd
+		);
+	}
 }
 
 void UGrabber::Release() {
 	UE_LOG(LogTemp, Error, TEXT("RELEASE!"));
+
+	PhysicsHandle->ReleaseComponent();
 }
 
 void UGrabber::FindPhysicsHandle() {
