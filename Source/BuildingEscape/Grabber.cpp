@@ -30,33 +30,22 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (PhysicsHandle->GrabbedComponent) {
-
-		FVector PlayerViewpointVector;
-		FRotator PlayerViewpointRotator;
-
-		GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-			OUT PlayerViewpointVector, 
-			OUT PlayerViewpointRotator);
-
-		FVector LineTraceEnd = PlayerViewpointVector + (PlayerViewpointRotator.Vector() * Reach);
-
-		PhysicsHandle->SetTargetLocation(LineTraceEnd);
+		PhysicsHandle->SetTargetLocation(GetLineTraceEnd());
 	}
 }
 
-void UGrabber::Grab() {
-
-	UE_LOG(LogTemp, Error, TEXT("GRAB!"));
-
+FVector UGrabber::GetLineTraceEnd() const
+{
 	FVector PlayerViewpointVector;
 	FRotator PlayerViewpointRotator;
-
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
 		OUT PlayerViewpointVector, 
 		OUT PlayerViewpointRotator);
+	return PlayerViewpointVector + (PlayerViewpointRotator.Vector() * Reach);
+}
 
-	FVector LineTraceEnd = PlayerViewpointVector + (PlayerViewpointRotator.Vector() * Reach);
-
+void UGrabber::Grab() 
+{
 	FHitResult RaycastHitResult = RaycastToFirstPhysicsBodyInRange();
 	UPrimitiveComponent* ComponentToGrab = RaycastHitResult.GetComponent();
 
@@ -64,25 +53,28 @@ void UGrabber::Grab() {
 		PhysicsHandle->GrabComponentAtLocation(
 			ComponentToGrab,
 			NAME_None,
-			LineTraceEnd
+			GetLineTraceEnd()
 		);
 	}
 }
 
-void UGrabber::Release() {
+void UGrabber::Release() 
+{
 	UE_LOG(LogTemp, Error, TEXT("RELEASE!"));
 
 	PhysicsHandle->ReleaseComponent();
 }
 
-void UGrabber::FindPhysicsHandle() {
+void UGrabber::FindPhysicsHandle() 
+{
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (!PhysicsHandle) {
+	if (PhysicsHandle == nullptr) {
 		UE_LOG(LogTemp, Error, TEXT("No PhysicsHandleComponent on object %s"), *GetOwner()->GetName());
 	}
 }
 
-void UGrabber::BindInputActions() {
+void UGrabber::BindInputActions() 
+{
 	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (InputComponent) {
 		UE_LOG(LogTemp, Warning, TEXT("Input Component Found on %s"), *GetOwner()->GetName());
@@ -91,27 +83,21 @@ void UGrabber::BindInputActions() {
 	}
 }
 
-FHitResult UGrabber::RaycastToFirstPhysicsBodyInRange() const {
-	
-	FVector PlayerViewpointVector;
-	FRotator PlayerViewpointRotator;
-
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewpointVector, 
-		OUT PlayerViewpointRotator);
-
-	FVector LineTraceEnd = PlayerViewpointVector + (PlayerViewpointRotator.Vector() * Reach);
-
+FHitResult UGrabber::RaycastToFirstPhysicsBodyInRange() const 
+{
 	FHitResult Hit;
 	FCollisionQueryParams TraceParams(
 		FName(TEXT("")),
 		false,
 		GetOwner()
 	);
+
+	FVector Position = GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
+
 	GetWorld()->LineTraceSingleByObjectType(
 		OUT Hit,
-		PlayerViewpointVector,
-		LineTraceEnd,
+		Position,
+		GetLineTraceEnd(),
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParams
 	);
@@ -121,7 +107,8 @@ FHitResult UGrabber::RaycastToFirstPhysicsBodyInRange() const {
 	return Hit;
 }
 
-void UGrabber::DrawDebugLine() {
+void UGrabber::DrawDebugLine() 
+{
 	// 	DrawDebugLine(
 	// 	GetWorld(), 
 	// 	PlayerViewpointVector,

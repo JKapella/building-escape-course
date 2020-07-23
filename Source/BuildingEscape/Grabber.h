@@ -35,6 +35,7 @@ private:
 	void Release();
 	void FindPhysicsHandle();
 	void BindInputActions();
+	FVector GetLineTraceEnd() const;
 	FHitResult RaycastToFirstPhysicsBodyInRange() const;
 
 	//Unused - but kept for future reference
