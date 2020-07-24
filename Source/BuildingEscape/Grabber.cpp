@@ -29,6 +29,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (!PhysicsHandle){return;}
 	if (PhysicsHandle->GrabbedComponent) {
 		PhysicsHandle->SetTargetLocation(GetLineTraceEnd());
 	}
@@ -50,6 +51,7 @@ void UGrabber::Grab()
 	UPrimitiveComponent* ComponentToGrab = RaycastHitResult.GetComponent();
 
 	if (RaycastHitResult.GetActor()) {
+		if (!PhysicsHandle){return;}
 		PhysicsHandle->GrabComponentAtLocation(
 			ComponentToGrab,
 			NAME_None,
@@ -60,15 +62,14 @@ void UGrabber::Grab()
 
 void UGrabber::Release() 
 {
-	UE_LOG(LogTemp, Error, TEXT("RELEASE!"));
-
+	if (!PhysicsHandle){return;}
 	PhysicsHandle->ReleaseComponent();
 }
 
 void UGrabber::FindPhysicsHandle() 
 {
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle == nullptr) {
+	if (!PhysicsHandle) {
 		UE_LOG(LogTemp, Error, TEXT("No PhysicsHandleComponent on object %s"), *GetOwner()->GetName());
 	}
 }
